@@ -43,7 +43,7 @@ export default function Home() {
                 asChild
                 className="w-44 p-4 font-bold bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition"
               >
-                <a href="http://localhost:3000/image-classifier">Қолдану</a>
+                <a href="/image-classifier">Қолдану</a>
               </Button>
             </span>
           </div>
@@ -79,8 +79,11 @@ export default function Home() {
               </span>
               <span>Өсімдіктерді қорғауды бүгіннен бастаңыз!</span>
             </p>
-            <Button className="w-64 p-10 text-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition">
-              Қолданып көру
+            <Button
+              asChild
+              className="w-64 p-10 text-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition"
+            >
+              <a href="/image-classifier">Қолдану</a>
             </Button>
           </section>
           <section className="flex-none">
@@ -127,8 +130,11 @@ export default function Home() {
                 Құнарлы жер – мол өнімнің кепілі. Бүгін тексеріп көріңіз!
               </span>
             </p>
-            <Button className="w-64 p-10 text-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition">
-              Қолданып көру
+            <Button
+              asChild
+              className="w-64 p-10 text-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition"
+            >
+              <a href="/api/auth/signin">Қолдану</a>
             </Button>
           </section>
         </div>
@@ -158,8 +164,11 @@ export default function Home() {
                 қорғаңыз!
               </span>
             </p>
-            <Button className="w-64 p-10 text-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition">
-              Қолданып көру
+            <Button
+              asChild
+              className="w-64 p-10 text-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition"
+            >
+              <a href="/farm/fields">Қолдану</a>
             </Button>
           </section>
           <section className="flex-none">

@@ -18,12 +18,36 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { toast } from "sonner";
+
+import { EllipsisVertical, Trash2 } from "lucide-react";
+
+import { useRouter } from "next/navigation";
+
 export default function ImageClassifierPage() {
+  const router = useRouter();
+
+  // user uploaded image URL, to show it on browser
   const [imageURL, setImageURL] = useState<string | undefined>();
+
+  // user uploaded image file which needed to make POST request
   const [image, setImage] = useState<File | null>(null);
 
+  // all fetched images from backend
   const [fetchedImages, setFetchedImages] = useState<ImageDTO[]>([]);
 
+  // fetching images to display it on browser
+  // function would be called while client rendering
   useEffect(() => {
     const fetchImages = async () => {
       try {
@@ -36,8 +60,6 @@ export default function ImageClassifierPage() {
 
         const data = await res.json();
 
-        console.log("Fetched images:", data.imageDTOs);
-
         setFetchedImages(data.imageDTOs);
       } catch (err: any) {
         console.error("Error fetching images:", err);
@@ -48,8 +70,10 @@ export default function ImageClassifierPage() {
     fetchImages();
   }, []);
 
+  // backend response, describes the image processing results
   const [response, setResponse] = useState<ImageDTO>();
 
+  // if user upload an image it would be set it's image URL and file itself
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -58,6 +82,9 @@ export default function ImageClassifierPage() {
     }
   };
 
+  // function which handles user submit action
+  // makes POST request to Next.js API
+  // awaits response as ImageDTO
   const handleSubmit = async () => {
     if (!image) return;
 
@@ -74,10 +101,72 @@ export default function ImageClassifierPage() {
     setResponse(data);
   };
 
-  const [count, setCount] = useState(0);
+  const handleImageDelete = async (imageId: string) => {
+    try {
+      const res = await fetch(`/api/images/${imageId}`, {
+        method: "DELETE",
+      });
 
-  const handleLoadMore = () => {
-    setCount((prev) => prev + 1);
+      if (!res.ok) {
+        const error = await res.json();
+        return toast.error("Іс-әрекетті орындау мүмкін болмады.", {
+          description: `Жауап статусы: ${error.message || error.status}`,
+        });
+      }
+
+      const response = await res.json();
+
+      if (response.status === 200) {
+        toast.info("Суретті өшіру сәтті аяқталды.");
+        setFetchedImages(prevItems => prevItems.filter(item => item.id !== imageId));
+      } else {
+        toast.warning("Суретті өшіру сәтсіз аяқталды.", {
+          description: `Жауап статусы: ${response.status}`,
+        });
+      }
+    } catch (error) {
+      toast.error("Суретті өшіру сәтсіз аяқталды.", {
+        description: "Іс-әрекетті орындау кезінде қате орын алды.",
+      });
+    }
+  };
+
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(true);
+
+  const handleLoadMore = async() => {
+
+    if (!hasNext) return toast.info("Барлық суреттер жүктелді!");
+
+    try {
+      const res = await fetch(`/api/images?page=${page}`, {
+        method: "GET",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        return toast.error("Іс-әрекетті орындау мүмкін болмады.", {
+          description: `Жауап статусы: ${error.message || error.status}`,
+        });
+      }
+
+      const response = await res.json();
+
+      if (response.status === 200) {
+        setPage(page + 1);
+        if (response.imageDTOs.length < 10) setHasNext(false);
+        setFetchedImages(prevItems => [...prevItems, ...response.imageDTOs]);
+        toast.info("Суреттерді жүктеу сәтті аяқталды.");
+      } else {
+        toast.warning("Суреттерді жүктеу сәтсіз аяқталды.", {
+          description: `Жауап статусы: ${response.status}`,
+        });
+      }
+    } catch (error) {
+      toast.error("Суреттерді жүктеу кезінде қателік орын алды.", {
+        description: "Іс-әрекетті орындау кезінде қате орын алды.",
+      });
+    }
   };
 
   return (
@@ -119,7 +208,9 @@ export default function ImageClassifierPage() {
                 className="max-h-64 object-contain"
               />
             ) : (
-              <span className="text-white">Өсімдік жапырағы суретін жүктеңіз...</span>
+              <span className="text-white">
+                Өсімдік жапырағы суретін жүктеңіз...
+              </span>
             )}
           </div>
         </CardContent>
@@ -143,7 +234,8 @@ export default function ImageClassifierPage() {
                   <span>Сурет типі: {response.contentType}</span>
                   <br></br>
                   <span>
-                    Сараптама нәтижесі: <span className="text-3xl">{response.classifiedLabel}</span>
+                    Сараптама нәтижесі:{" "}
+                    <span className="text-3xl">{response.classifiedLabel}</span>
                   </span>
                   <br></br>
                   <span>Өңдеу уақыты: {response.processedAt}</span>
@@ -157,12 +249,35 @@ export default function ImageClassifierPage() {
           <div className="flex flex-col items-center justify-items-center content-center p-5 max-h-200 overflow-hidden overflow-y-auto">
             <section className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
               {fetchedImages.map((dto, index) => (
-                <div key={index} className="break-inside-avoid">
+                <div key={index} className="break-inside-avoid relative group">
                   <img
                     src={dto.url}
                     alt="Plant disease"
                     className="w-full h-auto rounded-t-xl shadow-2xl shadow-slate-800/50"
                   />
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon">
+                          <EllipsisVertical />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56">
+                        <DropdownMenuLabel>Іс-әрекеттер</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleImageDelete(dto.id);
+                            }}
+                          >
+                            <Trash2 />
+                            <span>Өшіру</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   <p className="w-full p-4 text-sm font-mono italic bg-white bottom-0 rounded-b-lg border-1 border-black">
                     <span className="">{dto.classifiedLabel}</span>
                     <br />
@@ -173,7 +288,7 @@ export default function ImageClassifierPage() {
                 </div>
               ))}
             </section>
-            <Button className="mt-10">Тағы жүктеу</Button>
+            <Button className="mt-10" onClick={() => {handleLoadMore()}}>Тағы жүктеу</Button>
           </div>
         </CardFooter>
       </Card>

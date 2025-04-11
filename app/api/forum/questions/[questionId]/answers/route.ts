@@ -28,7 +28,6 @@ async function fetchAnswersByQuestionId(questionId: Number): Promise<Answer[]> {
 
     if (session) {
       accessToken = session.accessToken;
-      console.log("in if session branch");
     }
 
     const response = await fetch(
@@ -45,8 +44,6 @@ async function fetchAnswersByQuestionId(questionId: Number): Promise<Answer[]> {
     if (response.status === 401) {
       redirect("/auth/signin");
     }
-
-    console.log(response.status);
 
     if (!response.ok) {
       throw new Error(`Error while fetching answers: ${response.status}`);
@@ -104,7 +101,7 @@ export async function POST(
 
 async function addAnswerToQuestionById(
   questionId: number,
-  content: JSON,
+  body: JSON,
   accessToken: string
 ) {
   try {
@@ -116,7 +113,7 @@ async function addAnswerToQuestionById(
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(content),
+        body: JSON.stringify(body),
       }
     );
 
@@ -126,7 +123,6 @@ async function addAnswerToQuestionById(
     }
 
     if (!response.ok) {
-      console.error(`Failed request: ${response.status}`);
       return { error: `Request failed with status ${response.status}` };
     }
 

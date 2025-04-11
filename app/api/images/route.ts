@@ -1,12 +1,14 @@
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
-  // 🔐 Check authentication
+export async function GET(req: NextRequest) {
+
+  const searchParams = req.nextUrl.searchParams;
+  const page = searchParams.get("page") || 0;
+
   const session = await auth();
 
   if (!session) {
-    // TODO: Add a redirect to sign-in page if needed
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -15,7 +17,7 @@ export async function GET(req: Request) {
   try {
     // 🌐 Call your backend image-service
     const result = await fetch(
-      "http://localhost:8767/image-service/api/v2/images",
+      `http://localhost:8767/image-service/api/v2/images?page=${page}`,
       {
         method: "GET",
         headers: {
@@ -38,6 +40,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       message: "Fetched images successfully!",
+      status: 200,
       imageDTOs,
     });
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 import { Answer } from "@/interfaces/answer";
 
@@ -17,7 +17,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { CreditCard, Settings, User } from "lucide-react";
+import {
+  CreditCard,
+  Settings,
+  User,
+  MoreVertical,
+  Trash2,
+  CircleCheck,
+} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -30,8 +37,30 @@ import {
 
 import { Separator } from "@/components/ui/separator";
 
-export default function Answers({ questionId }: { questionId: string }) {
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { AcceptAnswerDialog } from "@/components/layout/accept-answer-alert-dialog";
+
+export default function Answers({
+  questionId,
+  isClosed,
+  isQuestionOwner,
+}: {
+  questionId: string;
+  isClosed: boolean;
+  isQuestionOwner: boolean;
+}) {
   const router = useRouter();
 
   const [answers, setAnswers] = useState<Answer[]>([]);
@@ -48,10 +77,10 @@ export default function Answers({ questionId }: { questionId: string }) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ content: answer }),
+      body: JSON.stringify({ body: answer }),
     });
-    
-    router.refresh();
+
+    if (res.ok) window.location.reload();
   };
 
   const handleAnswerDelete = async (answerId: Number) => {
@@ -64,6 +93,8 @@ export default function Answers({ questionId }: { questionId: string }) {
         },
       }
     );
+
+    if (res.ok) window.location.reload();
   };
 
   useEffect(() => {
@@ -84,41 +115,88 @@ export default function Answers({ questionId }: { questionId: string }) {
     fetchComments();
   }, [questionId]);
 
-  if (loading) return <p>Жауаптарды жүктеудеміз...</p>;
+  const handleAcceptingAnswer = async (
+    questionId: string,
+    answerId: string
+  ) => {
+    try {
+      const res = await fetch(
+        `/api/forum/questions/${questionId}/answers/${answerId}`,
+        {
+          method: "PATCH",
+        }
+      );
 
-  if (!answers.length) return <p>Әзірге ешбір жауап жоқ.</p>;
+      if (!res.ok) {
+        const error = await res.json();
+        return toast.error("Іс-әрекетті орындау мүмкін болмады.", {
+          description: `Жауап статусы: ${error.message || error.status}`,
+        });
+      }
+
+      const response = await res.json();
+
+      if (response.status === 200) {
+        toast.info("Жауапты қабылдау сәтті орындалды.");
+        return window.location.reload();
+      } else {
+        toast.warning("Жауапты қабылдау сәтсіз аяқталды.", {
+          description: `Жауап статусы: ${response.status}`,
+        });
+      }
+    } catch (error) {
+      toast.error("Жауапты қабылдау сәтсіз аяқталды.", {
+        description: "Іс-әрекетті орындау кезінде қате орын алды.",
+      });
+    }
+  };
+
+  if (loading) return <p>Жауаптарды жүктеудеміз...</p>;
 
   return (
     <>
-      <div className="p-4 border rounded-lg bg-white shadow-md">
-        <button
-          onClick={() => setShowForm((prev) => !prev)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          {showForm ? "Бас тарту" : "Жауап жазу"}
-        </button>
+      {!isClosed && (
+        <div className="p-4 border rounded-lg bg-white shadow-md">
+          <button
+            onClick={() => setShowForm((prev) => !prev)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            {showForm ? "Бас тарту" : "Жауап жазу"}
+          </button>
 
-        {showForm && (
-          <form onSubmit={handleNewAnswerSubmit} className="mt-4 flex flex-col">
-            <textarea
-              className="border p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-              rows={4}
-              placeholder="Жауабыңызды енгізіңіз..."
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          {showForm && (
+            <form
+              onSubmit={handleNewAnswerSubmit}
+              className="mt-4 flex flex-col"
             >
-              Жүктеу
-            </button>
-          </form>
-        )}
-      </div>
+              <textarea
+                className="border p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                rows={4}
+                placeholder="Жауабыңызды енгізіңіз..."
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+              >
+                Жүктеу
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
       {answers &&
         answers.map((answer, index) => (
-          <Card key={index} className="w-full rounded-none">
+          <Card
+            key={index}
+            className={
+              answer.isAccepted
+                ? "w-full rounded-none border-1 border-green-500"
+                : "w-full rounded-none"
+            }
+          >
             <CardHeader className="relative">
               <CardTitle>Қолданушы: {answer.userId}</CardTitle>
               <CardDescription>{answer.createdAt}</CardDescription>
@@ -126,41 +204,50 @@ export default function Answers({ questionId }: { questionId: string }) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline">
-                      <Settings />
+                      <MoreVertical />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48">
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuItem>
-                        <User />
-                        <span>Профильге өту</span>
-                      </DropdownMenuItem>
                       {answer.currentUserAnswer && (
                         <>
-                          <DropdownMenuItem>
-                            <CreditCard />
-                            <span>Өзгерту</span>
-                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
                               handleAnswerDelete(Number(answer.id))
                             }
                           >
-                            <Settings />
+                            <Trash2 />
                             <span>Өшіру</span>
                           </DropdownMenuItem>
                         </>
                       )}
+                      {isQuestionOwner &&
+                        !answer.currentUserAnswer &&
+                        !answer.isAccepted && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleAcceptingAnswer(questionId, answer.id)
+                            }
+                          >
+                            <CircleCheck />
+                            <span>Жауапты қабылдау</span>
+                          </DropdownMenuItem>
+                        )}
                     </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
               <Separator />
             </CardHeader>
             <CardContent>{answer.body}</CardContent>
-            <CardFooter></CardFooter>
+            <CardFooter>
+              {answer.isAccepted && (
+                <>
+                  <CircleCheck /> Қабылданған жауап
+                </>
+              )}
+            </CardFooter>
           </Card>
         ))}
     </>

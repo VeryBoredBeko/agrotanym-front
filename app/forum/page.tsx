@@ -29,21 +29,31 @@ import {
 } from "@/components/ui/pagination";
 import { redirect } from "next/navigation";
 
+// defines forum page properties
+// page - page number
+// tagId - questions cetegory
 interface ForumPageProps {
   searchParams: {
     page?: string;
+    tagId?: string;
   };
 }
 
 export default async function ForumPage({ searchParams }: ForumPageProps) {
-  const params = await searchParams;
-  const pageNumber = Number(params.page) || 0;
 
+  // getting forum page seacrh parameters
+  const params = await searchParams;
+
+  const pageNumber = Number(params.page) || 0;
+  const tagId = params.tagId || "";
+
+  // validating page number from being negative
   if (pageNumber < 0) {
-    redirect("/forum?page=0");
+    redirect(`/forum?page=0&tagId=${tagId}`);
   }
 
-  const fetchResult = await getQuestions(pageNumber);
+  // making call to function to fetch specified questions
+  const fetchResult = await getQuestions(pageNumber, tagId);
 
   const error = fetchResult.error;
   const status = fetchResult.status;
@@ -116,18 +126,28 @@ export default async function ForumPage({ searchParams }: ForumPageProps) {
 
             <Pagination>
               <PaginationContent>
+                {pageNumber > 0 && (
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href={`/forum?page=${pageNumber - 1}&tagId=${tagId}`}
+                    />
+                  </PaginationItem>
+                )}
                 <PaginationItem>
-                  <PaginationPrevious href={`/forum?page=${pageNumber - 1}`} />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="" isActive={true}>{pageNumber}</PaginationLink>
+                  <PaginationLink href="" isActive={true}>
+                    {pageNumber}
+                  </PaginationLink>
                 </PaginationItem>
                 <PaginationItem>
                   <PaginationEllipsis />
                 </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href={`/forum?page=${pageNumber + 1}`} />
-                </PaginationItem>
+                {questions.length === 10 && (
+                  <PaginationItem>
+                    <PaginationNext
+                      href={`/forum?page=${pageNumber + 1}&tagId=${tagId}`}
+                    />
+                  </PaginationItem>
+                )}
               </PaginationContent>
             </Pagination>
           </section>
@@ -137,13 +157,18 @@ export default async function ForumPage({ searchParams }: ForumPageProps) {
   }
 }
 
-async function getQuestions(pageNumber: number): Promise<{
+async function getQuestions(
+  pageNumber: number,
+  tagId: string
+): Promise<{
   data: Question[] | null;
   error?: string;
   status: number;
 }> {
   try {
-    const res = await fetch(`${process.env.FORUM_SERVICE_URL}/questions?page=${pageNumber}`, {
+    const fetchURL = `${process.env.FORUM_SERVICE_URL}/questions?page=${pageNumber}&tagId=${tagId}`;
+
+    const res = await fetch(fetchURL, {
       cache: "no-store",
     });
 

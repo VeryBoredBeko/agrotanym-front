@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 
+import { Textarea } from "@/components/ui/textarea";
+
 import { Tag } from "@/interfaces/tag";
 import { Question } from "@/interfaces/question";
 import { redirect } from "next/navigation";
@@ -60,20 +62,17 @@ export default function QuestionForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const result = await fetch(
-      `/api/forum/questions`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: values.title,
-          body: values.body,
-          tagIdList: [values.tag],
-        }),
-      }
-    );
+    const result = await fetch(`/api/forum/questions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: values.title,
+        body: values.body,
+        tagIdList: [values.tag],
+      }),
+    });
 
     if (result.ok) {
       redirect("/forum");
@@ -127,7 +126,12 @@ export default function QuestionForm() {
             <FormItem>
               <FormLabel>Сұрақтың мәтіні</FormLabel>
               <FormControl>
-                <Input placeholder="Сіздің сұрағыңыздың мәтіні" {...field} />
+                <Textarea
+                  placeholder="Сіздің сұрағыңыздың мәтінін"
+                  className=""
+                  {...field}
+                />
+                {/* <Input placeholder="Сіздің сұрағыңыздың мәтіні" {...field} /> */}
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -4,6 +4,8 @@ import Keycloak from "next-auth/providers/keycloak";
 import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
+// function which will refresh access token via making request to provaider
+// fetches new access and resresh tokens from provaider
 async function refreshAccessToken(token: any) {
   try {
     const url = `${process.env.AUTH_KEYCLOAK_ISSUER}/protocol/openid-connect/token`;
@@ -39,6 +41,9 @@ async function refreshAccessToken(token: any) {
   }
 }
 
+// NextAuth handler function
+// function defines Keycloak as a provider
+// function defines authenticating strategy as JWT
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Keycloak],
   session: {
@@ -46,6 +51,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, account }) {
+
+      // this branch would work if user is not authenticated
       if (account) {
         return {
           accessToken: account.access_token,
@@ -55,13 +62,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
       }
 
+      // this branch would work if access token is not expired
       if (Date.now() < (token.accessTokenExpires as number)) {
         return token;
       }
 
+      // otherwise would be called refreshing access token attempt
       return refreshAccessToken(token);
     },
     async session({ session, token }: { session: Session; token: JWT }) {
+
+      // if refreshing access token ended unsuccessfully
+      // this branch would pass error to session object
       if (token.error === "RefreshAccessTokenError") {
         session.error = token.error;
         return session;
@@ -73,5 +85,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+
+  // Auth.js secret to signaturing tokens
   secret: process.env.NEXTAUTH_SECRET,
 });

@@ -46,6 +46,9 @@ import {
 import { Input } from "@/components/ui/input";
 import CommentMenu from "./comment-menu";
 import MarkerMenu from "./marker-menu";
+import ClimatologyTable from "./climatology-table";
+import { ClimatologyData } from "@/interfaces/climatology";
+import { ClimatologyComponent } from "./climatology-component";
 
 type MapViewProps = {
   fields: Field[];
@@ -265,6 +268,28 @@ const MapView: React.FC<MapViewProps> = ({ fields, selectedField }) => {
       </Popup>
     );
   };
+
+  const [climatologyData, setClimatologyData] =
+    useState<ClimatologyData | null>(null);
+
+  useEffect(() => {
+    if (!selectedField) return;
+
+    async function fetchNASAAPI() {
+      const longitude = selectedField?.coordinates[0].longitude;
+      const latitude = selectedField?.coordinates[0].latitude;
+
+      const res = await fetch(
+        `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=T2M,PS,WS10M,SI_EF_TILTED_SURFACE&community=AG&longitude=${longitude}&latitude=${latitude}&format=JSON&wind-surface=SeaIce&wind-elevation=50&site-elevation=50`
+      );
+
+      const data = await res.json();
+
+      setClimatologyData(data);
+    }
+
+    fetchNASAAPI();
+  }, [selectedField]);
 
   return (
     <div className="grid grid-row gap-4">
@@ -529,12 +554,22 @@ const MapView: React.FC<MapViewProps> = ({ fields, selectedField }) => {
                     />
                   </td>
                   <td className="p-2 border border-gray-300">
-                    <MarkerMenu fieldId={selectedField.id!} markerId={marker.id} />
+                    <MarkerMenu
+                      fieldId={selectedField.id!}
+                      markerId={marker.id}
+                    />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </section>
+      )}
+
+      {climatologyData && (
+        <section className="overflow-x-auto">
+          {/* <ClimatologyComponent data={climatologyData} /> */}
+          <ClimatologyTable data={climatologyData} />
         </section>
       )}
     </div>

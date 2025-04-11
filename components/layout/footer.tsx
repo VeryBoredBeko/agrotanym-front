@@ -28,10 +28,7 @@ export default function Footer() {
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="#"
-                      className="hover:underline"
-                    >
+                    <a href="#" className="hover:underline">
                       ЖИ көмегі
                     </a>
                   </li>
@@ -43,18 +40,12 @@ export default function Footer() {
                 </h2>
                 <ul className="text-white dark:text-gray-400 font-medium">
                   <li className="mb-4">
-                    <a
-                      href="#"
-                      className="hover:underline "
-                    >
+                    <a href="#" className="hover:underline ">
                       Github
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="#"
-                      className="hover:underline"
-                    >
+                    <a href="#" className="hover:underline">
                       Instagram
                     </a>
                   </li>
@@ -62,17 +53,17 @@ export default function Footer() {
               </div>
               <div>
                 <h2 className="mb-6 text-sm font-semibold text-white uppercase dark:text-white">
-                  Legal
+                  Құқық
                 </h2>
                 <ul className="text-white dark:text-gray-400 font-medium">
                   <li className="mb-4">
                     <a href="#" className="hover:underline">
-                      Privacy Policy
+                      Құпиялылық саясаты
                     </a>
                   </li>
                   <li>
                     <a href="#" className="hover:underline">
-                      Terms &amp; Conditions
+                      Қолдану шарттары
                     </a>
                   </li>
                 </ul>
@@ -82,7 +73,7 @@ export default function Footer() {
           <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
           <div className="sm:flex sm:items-center sm:justify-between">
             <span className="text-sm text-white sm:text-center dark:text-gray-400">
-              © 2023{" "}
+              © 2025{" "}
               <a href="#" className="hover:underline">
                 Agrotanym™
               </a>

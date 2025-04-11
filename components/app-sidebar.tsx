@@ -30,7 +30,7 @@ const data = {
         },
         {
           title: "Менің сұрақтарым",
-          url: "/forum/questions/user",
+          url: "/forum/my-questions",
         },
         {
           title: "Хабарландыру",
@@ -43,25 +43,25 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Өсімдік шаруашылығы",
-          url: "#",
+          title: "Дәнді дақылдарды өсіру",
+          url: "/forum?tagId=6",
         },
         {
-          title: "Мал шаруашылығы",
-          url: "#",
+          title: "Көкөніс шаруашылығы",
+          url: "/forum?tagId=7",
         },
         {
-          title: "Агроинновациялар",
-          url: "#",
+          title: "Жеміс ағаштары және жүзім өсіру",
+          url: "/forum?tagId=8",
         },
         {
-          title: "Техника және құрал-жабдықтар",
-          url: "#",
+          title: "Топырақты өңдеу және себу технологиялары",
+          url: "/forum?tagId=9",
         },
         {
-          title: "Климат / ауа-райы",
-          url: "#",
-        },
+          title: "Өсімдіктерді қорғау (аурулар, зиянкестер)",
+          url: "/forum?tagId=10",
+        }
       ],
     },
   ],

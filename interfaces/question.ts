@@ -9,6 +9,9 @@ export interface Question {
   isClosed: boolean;
   createdAt: string;
   updatedAT: string;
+  isVoted: boolean;
+  voteType: string;
+  isOwner: boolean;
 }
 
 export interface Tag {
