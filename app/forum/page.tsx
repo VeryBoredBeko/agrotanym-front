@@ -1,4 +1,5 @@
 "use server";
+
 import { Question } from "@/interfaces/question";
 
 import {
@@ -40,7 +41,6 @@ interface ForumPageProps {
 }
 
 export default async function ForumPage({ searchParams }: ForumPageProps) {
-
   // getting forum page seacrh parameters
   const params = await searchParams;
 
@@ -77,7 +77,7 @@ export default async function ForumPage({ searchParams }: ForumPageProps) {
           <section className="grid col-span-2 gap-4">
             {questions &&
               questions.map((question, index) => (
-                <Card key={index} className="w-161">
+                <Card key={index} className="w-full">
                   <a
                     href={`http://localhost:3000/forum/questions/${question.id}`}
                   >
@@ -86,7 +86,7 @@ export default async function ForumPage({ searchParams }: ForumPageProps) {
                     </CardHeader>
                     <CardContent className="pb-2">{question.body}</CardContent>
                     <Separator />
-                    <CardFooter className="pt-2 flex grid grid-cols-4 grid-cols-[20%_20%_20%_40%]">
+                    <CardFooter className="pt-2 flex grid grid-cols-3 grid-cols-[30%_30%_40%]">
                       <section className="flex flex-row justify-evenly rounded-lg">
                         <ArrowUp />
                         {question.votesCount ? (
@@ -95,14 +95,6 @@ export default async function ForumPage({ searchParams }: ForumPageProps) {
                           <span>0</span>
                         )}
                         <ArrowDown />
-                      </section>
-                      <section className="flex flex-row justify-center gap-2 rounded-lg">
-                        <Eye />{" "}
-                        {question.views ? (
-                          <span>{question.views}</span>
-                        ) : (
-                          <span>0</span>
-                        )}
                       </section>
                       <section className="flex flex-row justify-center gap-2 rounded-lg">
                         <MessageCircleMore />{" "}
@@ -157,6 +149,7 @@ export default async function ForumPage({ searchParams }: ForumPageProps) {
   }
 }
 
+// server function which fetches questions 
 async function getQuestions(
   pageNumber: number,
   tagId: string

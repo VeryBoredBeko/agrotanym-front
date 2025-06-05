@@ -63,7 +63,7 @@ export default async function Page({
           <CardHeader className="relative">
             <CardTitle>{question.title}</CardTitle>
             <CardDescription>{question.createdAt}</CardDescription>
-            <div className="absolute right-6 top-0">
+            {/* <div className="absolute right-6 top-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline">
@@ -89,7 +89,7 @@ export default async function Page({
                   <DropdownMenuSeparator />
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </div> */}
           </CardHeader>
           <CardContent>{question.body}</CardContent>
           <Separator />

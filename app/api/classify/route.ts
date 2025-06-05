@@ -5,12 +5,8 @@ import { ImageDTO } from "@/interfaces/image-dto";
 export async function POST(req: Request) {
   const session = await auth();
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.error === "RefreshAccessTokenError") {
-    return NextResponse.redirect(new URL(`${process.env.AUTH_SIGNIN_PATH}`));
+  if (!session || session.error === "RefreshAccessTokenError") {
+    return NextResponse.redirect(`${process.env.AUTH_SIGNIN_PATH}`);
   }
 
   const accessToken = session.accessToken;
@@ -36,6 +32,9 @@ export async function POST(req: Request) {
     }
   );
 
+  if (result.status === 401)
+    return NextResponse.redirect(`${process.env.AUTH_SIGNIN_PATH}`);
+
   if (!result.ok) {
     const errorText = await result.text();
     console.error("Backend error:", errorText);
@@ -49,5 +48,5 @@ export async function POST(req: Request) {
   const data = await result.json();
   const response: ImageDTO = data as ImageDTO;
 
-  return NextResponse.json<ImageDTO>(response); 
+  return NextResponse.json<ImageDTO>(response);
 }

@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 
 import { Toaster } from "@/components/ui/sonner"
+import { Navbar1 } from "@/components/layout/navbar-burger";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,8 @@ export default function RootLayout({
         mx-auto w-full md:max-w-[1280px] sm:max-w-[640px]`}
       >
         <header className="">
-          <Navbar />
+          {/* <Navbar /> */}
+          <Navbar1 />
         </header>
         <main className="overflow-auto">{children}</main>
         <Toaster richColors closeButton />

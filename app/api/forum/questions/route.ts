@@ -32,10 +32,12 @@ export async function POST(req: Request) {
     const errorText = await result.text();
 
     return NextResponse.json(
-      { error: "Backend error", details: errorText },
+      { error: "Error while uploading question to backend.", details: errorText },
       { status: result.status }
     );
   }
+  
+  const response = await result.json();
 
-  return NextResponse.json({status: 200});
+  return NextResponse.json({questionId: response.id});
 }

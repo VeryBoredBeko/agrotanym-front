@@ -63,8 +63,7 @@ export default function ImageClassifierPage() {
         setFetchedImages(data.imageDTOs);
       } catch (err: any) {
         console.error("Error fetching images:", err);
-      } finally {
-      }
+      } 
     };
 
     fetchImages();
@@ -101,6 +100,9 @@ export default function ImageClassifierPage() {
     setResponse(data);
   };
 
+  // function which handles image deletition by its unique id
+  // makes a request to Next.js API
+  // API returns only status code
   const handleImageDelete = async (imageId: string) => {
     try {
       const res = await fetch(`/api/images/${imageId}`, {
@@ -118,6 +120,7 @@ export default function ImageClassifierPage() {
 
       if (response.status === 200) {
         toast.info("Суретті өшіру сәтті аяқталды.");
+        // after successfull deletition update list of fetched images
         setFetchedImages(prevItems => prevItems.filter(item => item.id !== imageId));
       } else {
         toast.warning("Суретті өшіру сәтсіз аяқталды.", {
@@ -131,9 +134,14 @@ export default function ImageClassifierPage() {
     }
   };
 
+  // param which used while making request to backend
+  // for pagination purposes
   const [page, setPage] = useState(1);
+
+  // indicates is all images in database are fetched 
   const [hasNext, setHasNext] = useState(true);
 
+  // function to load next page of images
   const handleLoadMore = async() => {
 
     if (!hasNext) return toast.info("Барлық суреттер жүктелді!");
@@ -154,6 +162,8 @@ export default function ImageClassifierPage() {
 
       if (response.status === 200) {
         setPage(page + 1);
+        // if last fetched images list's length fewer than 10
+        // all images has been fetched and there is no pages left
         if (response.imageDTOs.length < 10) setHasNext(false);
         setFetchedImages(prevItems => [...prevItems, ...response.imageDTOs]);
         toast.info("Суреттерді жүктеу сәтті аяқталды.");
@@ -237,8 +247,6 @@ export default function ImageClassifierPage() {
                     Сараптама нәтижесі:{" "}
                     <span className="text-3xl">{response.classifiedLabel}</span>
                   </span>
-                  <br></br>
-                  <span>Өңдеу уақыты: {response.processedAt}</span>
                   <br></br>
                 </div>
               </div>

@@ -115,10 +115,10 @@ export default function QuestionInfo({ question }: { question: Question }) {
         </Button>
       </section>
 
-      <section className="flex flex-row justify-center gap-2 rounded-lg">
+      {/* <section className="flex flex-row justify-center gap-2 rounded-lg">
         <Eye />{" "}
         {question.views ? <span>{question.views}</span> : <span>0</span>}
-      </section>
+      </section> */}
       <section className="flex flex-row justify-center gap-2 rounded-lg">
         <MessageCircleMore />{" "}
         {question.answersCount ? (

@@ -4,12 +4,10 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const session = await auth();
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.error === "RefreshAccessTokenError") {
-    return NextResponse.redirect(new URL(`${process.env.AUTH_SIGNIN_PATH}`, `${process.env.NEXTAUTH_URL}`));
+  if (!session || session.error === "RefreshAccessTokenError") {
+    return NextResponse.redirect(
+      new URL(`${process.env.AUTH_SIGNIN_PATH}`, `${process.env.NEXTAUTH_URL}`)
+    );
   }
 
   const accessToken = session.accessToken;
@@ -22,11 +20,16 @@ export async function POST(req: Request) {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     }
   );
+
+  if (result.status === 401)
+    return NextResponse.redirect(
+      new URL(`${process.env.AUTH_SIGNIN_PATH}`, `${process.env.NEXTAUTH_URL}`)
+    );
 
   if (!result.ok) {
     const errorText = await result.text();
@@ -37,5 +40,5 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json({status : 200});
+  return NextResponse.json({ status: 200 });
 }

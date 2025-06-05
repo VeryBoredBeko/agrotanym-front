@@ -10,9 +10,10 @@ export default auth((req) => {
     const newUrl = new URL("/api/auth/signin", req.nextUrl);
     return NextResponse.redirect(newUrl);
   }
+  
 });
 
 export const config = {
   // defines URL-paths which would be intercepted
-  matcher: ["/forum/posts/create", "/image-classifier", "/farm/fields"],
+  matcher: ["/forum/posts/create", "/image-classifier", "/farm/fields", "/dirt-diagnosis"],
 };

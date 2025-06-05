@@ -32,7 +32,12 @@ export default async function Navbar() {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <Link href="/image-classifier" legacyBehavior passHref>
-              <NavigationMenuLink>AI көмегі</NavigationMenuLink>
+              <NavigationMenuLink>Өсімдік ауруын анықтау</NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Link href="/dirt-diagnosis" legacyBehavior passHref>
+              <NavigationMenuLink>AI-көмекші</NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
@@ -40,19 +45,9 @@ export default async function Navbar() {
               <NavigationMenuLink>Мониторинг</NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Link href="/about" legacyBehavior passHref>
-              <NavigationMenuLink>Біз туралы</NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
 
           {session ? (
             <>
-              <NavigationMenuItem>
-                <Link href="#" legacyBehavior passHref>
-                  <NavigationMenuLink>Профиль</NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link href="/api/auth/signout" legacyBehavior passHref>
                   <NavigationMenuLink>Шығу</NavigationMenuLink>

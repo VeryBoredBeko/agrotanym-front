@@ -1,4 +1,5 @@
 "use client";
+// This component is a client-side, because Leaflet map drawing only works in client-components
 
 import { useState, useRef, useEffect } from "react";
 import {
@@ -22,15 +23,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { Trash2 } from "lucide-react";
-
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
@@ -44,17 +42,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import CommentMenu from "./comment-menu";
-import MarkerMenu from "./marker-menu";
-import ClimatologyTable from "./climatology-table";
-import { ClimatologyData } from "@/interfaces/climatology";
-import { ClimatologyComponent } from "./climatology-component";
+import { CreateMarkerModal } from "./create-marker-modal";
 
+// This component asks for list of fields, to draw it on map and the selected field to highlight it
 type MapViewProps = {
   fields: Field[];
   selectedField?: Field;
 };
 
+// This function is used when showing the list of marker's icon
 const createImageIcon = (url: string) =>
   new Icon({
     iconUrl: url,
@@ -62,6 +58,7 @@ const createImageIcon = (url: string) =>
     className: "rounded",
   });
 
+// Client-side validated form schema for creating a new polygon and uploading it
 const polygonformSchema = z.object({
   name: z.string().min(8).max(255),
   crop: z.string().min(2).max(255),
@@ -72,6 +69,7 @@ const polygonformSchema = z.object({
   manager: z.string().min(8).max(255),
 });
 
+// Client-side validated form schema for creating a new marker and uploading it
 const markerformSchema = z.object({
   name: z.string().min(8).max(255),
   description: z.string().min(2).max(255),
@@ -79,6 +77,9 @@ const markerformSchema = z.object({
 });
 
 const MapView: React.FC<MapViewProps> = ({ fields, selectedField }) => {
+  /**
+   * Describes position where user had clicked in [latitude, longitude] format
+   */ 
   const [position, setPosition] = useState<[number, number] | null>(null);
 
   const [map, setMap] = useState<L.Map | null>(null);
@@ -260,36 +261,16 @@ const MapView: React.FC<MapViewProps> = ({ fields, selectedField }) => {
 
     return position === null ? null : (
       <Popup position={position}>
-        <div>
-          <p>Координаталар:</p>
-          <p>X: {position[0].toFixed(6)}</p>
-          <p>Y: {position[1].toFixed(6)}</p>
+        <div className="text-xs text-gray-700 leading-tight space-x-2">
+          <span className="font-medium">Координаталар:</span>
+          <span>X: {position[0].toFixed(6)}</span>
+          <span>Y: {position[1].toFixed(6)}</span>
         </div>
       </Popup>
     );
   };
 
-  const [climatologyData, setClimatologyData] =
-    useState<ClimatologyData | null>(null);
-
-  useEffect(() => {
-    if (!selectedField) return;
-
-    async function fetchNASAAPI() {
-      const longitude = selectedField?.coordinates[0].longitude;
-      const latitude = selectedField?.coordinates[0].latitude;
-
-      const res = await fetch(
-        `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=T2M,PS,WS10M,SI_EF_TILTED_SURFACE&community=AG&longitude=${longitude}&latitude=${latitude}&format=JSON&wind-surface=SeaIce&wind-elevation=50&site-elevation=50`
-      );
-
-      const data = await res.json();
-
-      setClimatologyData(data);
-    }
-
-    fetchNASAAPI();
-  }, [selectedField]);
+  const [imageUploadOption, setImageUploadOption] = useState(false);
 
   return (
     <div className="grid grid-row gap-4">
@@ -307,7 +288,7 @@ const MapView: React.FC<MapViewProps> = ({ fields, selectedField }) => {
 
           {/* <LocationMarker /> */}
 
-          {/* <ClickHandler /> */}
+          <ClickHandler />
 
           {fields &&
             fields.map((field, idx) => {
@@ -451,133 +432,21 @@ const MapView: React.FC<MapViewProps> = ({ fields, selectedField }) => {
       </section>
 
       <section>
-        <Dialog open={isMarkerModalOpen} onOpenChange={setMarkerModalOpen}>
-          <DialogContent className="flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Егістік алқабына маркерді енгізу</DialogTitle>
-              <DialogDescription>Маркер жайында деректер</DialogDescription>
-            </DialogHeader>
-
-            <Form {...form}>
-              <form
-                onSubmit={markerForm.handleSubmit(onMarkerFormSubmit)}
-                className="space-y-8"
-              >
-                <FormField
-                  control={markerForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Маркер атауы</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ауруға шалдыққан өсімдік анықталды"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Маркерді қоюдың себебін атаңыз.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={markerForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Маркердің анықтамасы</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Қызанақ ауруға шалдыққан"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Маркердің анықтамасын енгізіңіз.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={markerForm.control}
-                  name="imageURL"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Маркер суреті</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Маркер суретіне сілтеме"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Маркердің картада белгіленетін суретін таңдаңыз
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit">Қабылдау</Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+        <CreateMarkerModal
+          isMarkerModalOpen={isMarkerModalOpen}
+          setMarkerModalOpen={setMarkerModalOpen}
+          selectedFieldId={selectedField?.id}
+          userCreatedMarkerCoordinates={userCreatedMarkerCoordinates}
+        />
       </section>
-
-      {selectedField && selectedField.markers && (
-        <section className="overflow-auto">
-          <table className="table-auto w-full border-collapse border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 border border-gray-300">ID</th>
-                <th className="p-2 border border-gray-300">Атауы</th>
-                <th className="p-2 border border-gray-300">Анықтама</th>
-                <th className="p-2 border border-gray-300">Маркер суреті</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedField.markers.map((marker, idy) => (
-                <tr key={idy} className="odd:bg-white even:bg-gray-50">
-                  <td className="p-2 border border-gray-300">{marker.id}</td>
-                  <td className="p-2 border border-gray-300">{marker.name}</td>
-                  <td className="p-2 border border-gray-300">
-                    {marker.description}
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    <img
-                      src={marker.imageURL}
-                      alt={marker.name}
-                      className="h-10 w-10 object-cover rounded"
-                    />
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    <MarkerMenu
-                      fieldId={selectedField.id!}
-                      markerId={marker.id}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-
-      {climatologyData && (
-        <section className="overflow-x-auto">
-          {/* <ClimatologyComponent data={climatologyData} /> */}
-          <ClimatologyTable data={climatologyData} />
-        </section>
-      )}
     </div>
   );
 };
 
 export default MapView;
 
+// This function converts GeoJSON values into array of Coordinate,
+// to upload it to backend
 const convertPolygonToCoordinates = (polygon: L.Polygon): Coordinate[] => {
   const geoJSON = polygon.toGeoJSON() as GeoJSON.Feature<GeoJSON.Polygon>;
 
@@ -587,6 +456,8 @@ const convertPolygonToCoordinates = (polygon: L.Polygon): Coordinate[] => {
   }));
 };
 
+// This function converts GeoJSON values into object of Coordinate,
+// to upload it to backend
 const convertMarkerToCoordinate = (marker: L.Marker): Coordinate => {
   const geoJSON = marker.toGeoJSON() as GeoJSON.Feature<GeoJSON.Point>;
 

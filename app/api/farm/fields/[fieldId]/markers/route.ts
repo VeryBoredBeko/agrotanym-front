@@ -10,14 +10,8 @@ export async function POST(
 
   const session = await auth();
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.error === "RefreshAccessTokenError") {
-    return NextResponse.redirect(
-      new URL(`${process.env.AUTH_SIGNIN_PATH}`, `${process.env.NEXTAUTH_URL}`)
-    );
+  if (!session || session.error) {
+    return NextResponse.redirect("/api/auth/signin");
   }
 
   const accessToken = session.accessToken;
@@ -44,6 +38,8 @@ export async function POST(
       { status: result.status }
     );
   }
+
+  if (result.status === 401) return NextResponse.redirect("/api/auth/signin");
 
   return NextResponse.json({ status: 200 });
 }

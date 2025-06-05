@@ -25,6 +25,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { Hero45 } from "@/components/layout/hero-mockup";
 
 export default function Home() {
   return (
@@ -116,11 +117,11 @@ export default function Home() {
                 alt="AI icon"
               />
               <span className="text-4xl text-zinc-950/80 font-bold">
-                Топырақ құнарлылығын талдау
+                Топырақтың құрамын талдау
               </span>
             </div>
             <p className="flex flex-row flex-wrap text-2xl text-zinc-950/80">
-              <span>Топырақ құнарлылығын дәл анықтаңыз!</span>
+              <span>Топырақ құрамы қолайлы өсімдік түрін анықтаңыз!</span>
               <span>
                 Жетекші жасанды интеллект технологиялары топырақтың құрамын
                 талдап, оның сапасын бағалайды.
@@ -134,7 +135,7 @@ export default function Home() {
               asChild
               className="w-64 p-10 text-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition"
             >
-              <a href="/api/auth/signin">Қолдану</a>
+              <a href="/dirt-diagnosis">Қолдану</a>
             </Button>
           </section>
         </div>
@@ -181,6 +182,11 @@ export default function Home() {
             />
           </section>
         </div>
+
+        <div className="p-4">
+          <Hero45 heading="Біз сізге келесі мүмкіндіктерді ұсынамыз" />
+        </div>
+
         {/* <div className="w-full grid grid-rows-[30%_70%] gap-5 justify-items-center">
           <span className="text-4xl font-bold">Қолдану нұсқаулығы</span>
 

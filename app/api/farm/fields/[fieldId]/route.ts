@@ -1,56 +1,104 @@
 "use server";
 
 import { NextResponse } from "next/server";
-import { redirect } from "next/navigation";
-
 import { auth } from "@/auth";
 
 import { Field } from "@/interfaces/field";
 
 export async function GET(
   request: Request,
-  { params }: { params: { fieldId: Number } }
-): Promise<NextResponse<{ data: Field}>> {
+  { params }: { params: { fieldId: string } }
+) {
   const props = await params;
   const fieldId = props.fieldId;
 
-  const data: Field = await fetchFieldById(fieldId);
+  const session = await auth();
+  if (!session || session.error) {
+    return NextResponse.redirect(`${process.env.AUTH_SIGNIN_PATH}`);
+  }
 
-  return NextResponse.json<{ data: Field }>({
-    data,
-  });
-}
+  const accessToken = session.accessToken;
 
-async function fetchFieldById(fieldId: Number): Promise<Field> {
   try {
-    const session = await auth();
-    if (!session) redirect("/api/auth/signin");
-
-    const accessToken = session.accessToken;
-
     const response = await fetch(
       `${process.env.FARM_MONITORING_SERVICE_URL}/fields/${fieldId}`,
       {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
       }
     );
 
     if (response.status === 401) {
-      redirect("/auth/signin");
+      return NextResponse.redirect(`${process.env.AUTH_SIGNIN_PATH}`);
     }
 
     if (!response.ok) {
-      throw new Error(`Error while fetching answers: ${response.status}`);
+      return NextResponse.json(
+        { error: `Error fetching field: ${response.statusText}` },
+        { status: 500 }
+      );
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as Field;
 
-    return data as Field;
+    return NextResponse.json({ data });
   } catch (error) {
-    throw error;
+    return NextResponse.json(
+      {
+        error: "Something went wrong while fetching the field.",
+        details: String(error),
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { fieldId: Number } }
+) {
+  const props = await params;
+  const fieldId = props.fieldId;
+
+  const session = await auth();
+  if (!session) return NextResponse.redirect("/api/auth/signin");
+
+  const accessToken = session.accessToken;
+
+  try {
+    const response = await fetch(
+      `${process.env.FARM_MONITORING_SERVICE_URL}/fields/${fieldId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.status === 401) {
+      return NextResponse.redirect("/api/auth/signin");
+    }
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: "Something went wrong while deleting field." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: "Something went wrong while deleting field.",
+        details: String(error),
+      },
+      { status: 500 }
+    );
   }
 }

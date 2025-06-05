@@ -31,6 +31,16 @@ import { Tag } from "@/interfaces/tag";
 import { Question } from "@/interfaces/question";
 import { redirect } from "next/navigation";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "sonner";
+
 const formSchema = z.object({
   title: z
     .string({
@@ -74,11 +84,14 @@ export default function QuestionForm() {
       }),
     });
 
-    if (result.ok) {
-      redirect("/forum");
-    } else {
-      // toast show-up
+    if (!result.ok) {
+      toast.warning("Сұрақты жүктеу барысында қате орын алды.");
     }
+
+    const response = await result.json();
+    console.log(response);
+    toast.info("Сіздің сұрағыңыз сәтті жүктелді.");
+    redirect(`/forum/questions/${response.questionId}`);
   }
 
   const [fetchedTags, setFetchedTags] = useState<Tag[]>([]);
@@ -104,69 +117,83 @@ export default function QuestionForm() {
   }, []);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Сұрақ тақырыбы</FormLabel>
-              <FormControl>
-                <Input placeholder="Сіздің сұрағыңыздың тақырыбы" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="body"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Сұрақтың мәтіні</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Сіздің сұрағыңыздың мәтінін"
-                  className=""
-                  {...field}
-                />
-                {/* <Input placeholder="Сіздің сұрағыңыздың мәтіні" {...field} /> */}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="tag"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Сұрақ категориясы</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Сұрақ категориясын таңдаңыз" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {fetchedTags &&
-                    fetchedTags.map((tag, index) => {
-                      return (
-                        <SelectItem key={index} value={`${tag.id}`}>
-                          {tag.name}
-                        </SelectItem>
-                      );
-                    })}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Жариялау</Button>
-      </form>
-    </Form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Өз сұрағыңызды жүктеңіз</CardTitle>
+        <CardDescription>Сұрақтың тақырыбын, анықтамасын және санатын таңдаңыз.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Сұрақ тақырыбы</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Сіздің сұрағыңыздың тақырыбы"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="body"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Сұрақтың мәтіні</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Сіздің сұрағыңыздың мәтінін"
+                      className=""
+                      {...field}
+                    />
+                    {/* <Input placeholder="Сіздің сұрағыңыздың мәтіні" {...field} /> */}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="tag"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Сұрақ категориясы</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Сұрақ категориясын таңдаңыз" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {fetchedTags &&
+                        fetchedTags.map((tag, index) => {
+                          return (
+                            <SelectItem key={index} value={`${tag.id}`}>
+                              {tag.name}
+                            </SelectItem>
+                          );
+                        })}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Жариялау</Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
 

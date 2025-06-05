@@ -21,7 +21,8 @@ export default async function ForumPage({
 }>) {
   return (
     <div>
-      <SidebarProvider>
+      <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+      {/* <SidebarProvider>
         <AppSidebar/>
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -41,7 +42,7 @@ export default async function ForumPage({
           </header>
           <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
         </SidebarInset>
-      </SidebarProvider>
+      </SidebarProvider> */}
     </div>
   );
 }
